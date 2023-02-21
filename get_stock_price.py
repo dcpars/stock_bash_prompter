@@ -1,8 +1,12 @@
-from bs4 import BeautifulSoup
+import ssl
+
+from bs4 import BeautifulSoup, ParserRejectedMarkup
 import os
 import random
 import re
 import requests
+from requests import RequestException
+from urllib3.exceptions import MaxRetryError
 
 DEBUG_MODE = False
 DEFAULT_TICKER = "UBER"
@@ -47,22 +51,24 @@ def parse_prices(html):
         parser = BeautifulSoup(html, 'html.parser')
         return {"current_price": parse_current_price(parser),
                 "previous_close": parse_previous_close(parser)}
-    except:
+    except ParserRejectedMarkup:
         return None
 
 
 def fetch_html(ticker_symbol):
-    url = "https://finance.yahoo.com/quote/{tc}/".format(tc=ticker_symbol)
-    response = requests.get(url=url)
-    if response.ok:
-        return response.content.decode()
-    return None
+    try:
+        url = "https://finance.yahoo.com/quote/{tc}/".format(tc=ticker_symbol)
+        response = requests.get(url=url)
+        if response.ok:
+            return response.content.decode()
+    except (RequestException, MaxRetryError, ssl.SSLCertVerificationError):
+        return None
 
 
 def fetch_prices(ticker_symbol):
     if not DEBUG_MODE:
         html = fetch_html(ticker_symbol)
-        return parse_prices(html)
+        return parse_prices(html) if html is not None else None
     else:
         # Support random price generation for testing, so we don't
         # spam Yahoo finance and get blocked.
