@@ -24,7 +24,7 @@
 # Runs only when the market is open. For more frequent updates, adjust
 # the leftmost (minute) value. 
 # Make sure the path to the script matches the location on your machine
-*/10 09-16 * * 1-5 source ~/Code/stock_bash_prompter/update_stock_price.sh
+*/10 09-16 * * 1-5 ~/Code/stock_bash_prompter/update_stock_price.sh
 ```
 3. Add to your .bashrc or .bash_profile
 ```bash
