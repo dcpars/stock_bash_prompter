@@ -4,6 +4,7 @@ import random
 import re
 import requests
 
+DEBUG_MODE = False
 DEFAULT_TICKER = "UBER"
 TICKER_REGEX = "^[A-Z]{1,5}$"
 
@@ -58,6 +59,18 @@ def fetch_html(ticker_symbol):
     return None
 
 
+def fetch_prices(ticker_symbol):
+    if not DEBUG_MODE:
+        html = fetch_html(ticker_symbol)
+        return parse_prices(html)
+    else:
+        # Support random price generation for testing, so we don't
+        # spam Yahoo finance and get blocked.
+        previous_close = 35.00
+        change = round(random.uniform(-2.00, 2.00), 2)
+        return {"current_price": previous_close + change, "previous_close": previous_close}
+
+
 def calculate_percent_change(prices):
     current_price = prices["current_price"]
     previous_close = prices["previous_close"]
@@ -84,12 +97,7 @@ def format_percent_change(percent_change):
 
 if __name__ == '__main__':
     ticker_symbol = fetch_ticker_symbol()
-    html = fetch_html(ticker_symbol)
-    prices = parse_prices(html)
-    #previous_close = 34.11
-    #change = round(random.uniform(-1.00, 1.00), 2)
-    #prices = {"current_price": previous_close + change,
-              #"previous_close": previous_close}
+    prices = fetch_prices(ticker_symbol)
     if prices is not None:
         percent_change = calculate_percent_change(prices)
         color = calculate_percent_change_color(percent_change)
