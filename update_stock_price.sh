@@ -9,11 +9,19 @@ pushd "${directory}" >/dev/null 2>&1 || exit
 
 # Docker cleanup
 cleanup_docker() {
+    # There shouldn't be any previously-running containers, but
+    # stop and delete if there are any. 
     local container_id=$(docker container ls -a | grep bash_prompter | cut -d ' ' -f 1)
     if [ -n "${container_id}" ]
     then
         docker stop "${container_id}" >/dev/null 2>&1
         docker rm -f "${container_id}" >/dev/null 2>&1
+    fi
+    # Clean up any containers that have run and exited.
+    local exited_container_ids=$(docker ps -a -f status=exited | grep bash_prompter | cut -d ' ' -f 1)
+    if [ -n "${exited_container_ids}" ]
+    then
+        docker rm "${exited_container_ids}"
     fi
 }
 
