@@ -21,7 +21,7 @@ cleanup_docker() {
     local exited_container_ids=$(docker ps -a -f status=exited | grep bash_prompter | cut -d ' ' -f 1)
     if [ -n "${exited_container_ids}" ]
     then
-        docker rm "${exited_container_ids}"
+        docker rm "${exited_container_ids}" >/dev/null 2>&1
     fi
 }
 
